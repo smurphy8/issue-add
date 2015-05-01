@@ -1,0 +1,3 @@
+module Issue where
+
+import Issue.Internal

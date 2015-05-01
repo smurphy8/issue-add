@@ -1,0 +1,52 @@
+Name:                   issue-add
+Version:                0.0.1
+Author:                 Scott Murphy <scottmurphy09@gmail.com>
+Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
+License:                BSD3
+License-File:           LICENSE
+-- Synopsis:               
+-- Description:            
+Cabal-Version:          >= 1.10
+Build-Type:             Simple
+Extra-Source-Files:     README.md, ChangeLog.md
+
+Library
+  Default-Language:     Haskell2010
+  HS-Source-Dirs:       src
+  GHC-Options:          -Wall
+  Exposed-Modules:      Issue
+  Other-Modules:        Issue.Internal
+  Build-Depends:        base >= 4 && < 5
+                      , github == 0.13.1.7569
+                      , getopt-generics >= 0.6.3
+                      , trifecta
+Executable add-labels
+  Build-Depends:    base
+                  , getopt-generics >= 0.6.3
+                  , github
+                  , trifecta
+  Main-Is:        LabelsMain.hs
+  Hs-Source-Dirs: src
+
+Executable add-issues
+  Build-Depends:    base
+                  , getopt-generics >= 0.6.3
+                  , github
+                  , trifecta
+  Main-Is:        Main.hs
+  Hs-Source-Dirs: src
+
+                      
+Test-Suite spec
+  Type:                 exitcode-stdio-1.0
+  Default-Language:     Haskell2010
+  Hs-Source-Dirs:       src
+                      , test
+  Ghc-Options:          -Wall
+  Main-Is:              Spec.hs
+  Build-Depends:        base
+                      , hspec
+
+Source-Repository head
+  Type:                 git
+--  Location:             

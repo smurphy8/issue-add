@@ -1,0 +1,44 @@
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric      #-}
+{-# LANGUAGE OverloadedStrings  #-}
+module Main where
+
+import           Data.Aeson                     (Value (..), (.=))
+import qualified Data.Aeson                     as A
+import qualified Data.ByteString.Lazy.Char8     as BL
+import           Data.Traversable
+import           Data.Typeable
+import           GHC.Generics
+import qualified Network.Wreq                   as W
+import           Plow.Spot.Report
+import           Plowtech.Persist.Settings
+import           System.Console.GetOpt.Generics
+import           System.Environment
+
+data Options = Options {
+                        objectId :: String,
+                        conf     :: FilePath,
+                        user     :: String
+                       }
+ deriving (GHC.Generics.Generic,Typeable)
+
+instance System.Console.GetOpt.Generics.Generic Options
+instance HasDatatypeInfo Options
+
+
+defaultMailOptions u t = A.object ["from" .= ("alarms@plowtech.net"::String)
+                                  ,"to" .= u
+                                  ,"subject" .= ("Daily Report":: String)
+                                  ,"plainText" .= (""::String)
+                                  ,"htmlText" .= t
+                                  ,"attachments" .= nlst ]
+  where
+     nlst :: [Int]
+     nlst = []
+
+
+main :: IO ()
+main = do
+  options <- getArguments
+  eitherConf <- readDBConf . conf $ options
+  return () 
