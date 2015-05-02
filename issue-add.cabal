@@ -21,6 +21,10 @@ Library
                       , github == 0.13.1.7569                      
                       , getopt-generics >= 0.6.3
                       , trifecta
+                      , attoparsec
+                      , orgmode-parse
+                      , text
+                      , here
                       , bytestring
                       , shakespeare-templates
                       , shakespeare                
@@ -29,7 +33,7 @@ Executable add-labels-with-auth
                   , getopt-generics >= 0.6.3
                   , github
                   , bytestring
-                  , trifecta
+                  , trifecta           
                   , shakespeare
                   , shakespeare-templates
   Main-Is:        LabelMain.hs
@@ -39,6 +43,7 @@ Executable add-issues-with-auth
   Build-Depends:    base
                   , getopt-generics >= 0.6.3
                   , github
+                  , attoparsec
                   , bytestring
                   , trifecta
   Main-Is:        IssueMain.hs
