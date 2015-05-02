@@ -3,16 +3,16 @@
 
 module Action.Internal.Issue where
 
+import           Action.Internal.Label
 import           Data.Attoparsec.Text
 import           Data.ByteString                        (ByteString)
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here
+import           Data.Text                              (pack)
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (NewIssue (..))
 import qualified Github.Issues                          as Github
-
-import           Data.Text                              (pack)
 
 
 {--  NewIssue Format example
@@ -23,7 +23,19 @@ import           Data.Text                              (pack)
 
 --}
 
+-- | Example
+-- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
+tst = pack [here|
 
+* TODO This is the issue title :HereIsALabel:
+:PROPERTIES:
+:IssueNumber: 123
+:END:
+Here is the message body
+* Here is another issue :HereIsAnotherLabel:
+Here is another body
+
+|]
 
 -- |Network
 createNewIssue
@@ -61,15 +73,6 @@ done
 
 |]
 
--- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
-tst = pack [here|
+-- | Types
 
-* TODO This is the issue title :HereIsALabel:
-:PROPERTIES:
-:ISSUE: 123
-:END:
-Here is the message body
-* Here is another issue [11] :HereIsAnotherLabel:
-Here is another body
 
-|]
