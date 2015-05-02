@@ -1,22 +1,16 @@
-{-# LANGUAGE OverloadedStrings #-}
-module Issue.Internal where
-
-
-
+module Action.Internal.Label where
 import           Data.Traversable
 
 import           Github.Auth
 import qualified Github.Issues.Labels as Github
 -- | Won't work till my repo is merged
 
-myauth :: GithubAuth
-myauth = GithubBasicAuth "smurphy8" "jidejeh7"
 
 
-addLabelsToRepo repoUser repoName = traverse labelMaker labelList
+addLabelsToRepo authUser authPass repoUser repoName = traverse labelMaker labelList
   where
     labelMaker (c,l) = Github.createLabel auth repoUser repoName l c
-    auth = myauth
+    auth = GithubBasicAuth authUser authPass
 
 
 labelList :: [(String, String)]
