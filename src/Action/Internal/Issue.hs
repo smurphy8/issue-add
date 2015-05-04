@@ -23,6 +23,19 @@ import qualified Github.Issues                          as Github
 
 --}
 
+-- | DataTypes
+
+
+-- | 'HNewIssue' reflects the places where a datatype has been created
+-- to facilitate type checking before posting a new issue.
+
+data HNewIssue = HNewIssue { _newIssue       :: Text
+                           , _newIssueBody   :: Text
+                           , _newIssueLabels :: [RepoLabel]}
+
+
+
+
 -- | Example
 -- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
 tst = pack [here|

@@ -58,11 +58,15 @@ Test-Suite spec
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
   Build-Depends:        QuickCheck
+                      , attoparsec
                       , base
                       , bytestring
                       , github
+                      , here
                       , hspec
+                      , orgmode-parse
                       , template-haskell
+                      , text
 
 Source-Repository head
   Type:                 git

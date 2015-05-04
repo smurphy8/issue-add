@@ -37,6 +37,7 @@ data RepoLabel = Bug
                  |Wontfix
                  |Ready
                  |InProgress
+                 |Clean
  deriving (Show,Eq,Ord)
 
 -- | Call to the network to add all Labels
@@ -83,7 +84,8 @@ labelList = [Bug
             ,Duplicate
             ,Wontfix
             ,Ready
-            ,InProgress]
+            ,InProgress
+            ,Clean]
 
 -- | instead of show, a specific label converter is used
 -- | that way it can be controlled w/o all the ReadS and ShowS
@@ -111,6 +113,7 @@ toLabelString Duplicate                 =  "Duplicate"
 toLabelString Wontfix                   =  "Wontfix"
 toLabelString Ready                     =  "Ready"
 toLabelString InProgress                =  "In Progress"
+toLabelString Clean                     =  "Clean"
 
 
 -- | inverse function, notice the either strings are strings afterall
@@ -136,6 +139,7 @@ fromLabelString "Duplicate"               =  Right Duplicate
 fromLabelString "Wontfix"                 =  Right Wontfix
 fromLabelString "Ready"                   =  Right Ready
 fromLabelString "In Progress"             =  Right InProgress
+fromLabelString "Clean"                   =  Right Clean
 fromLabelString str                       =  Left  $ str <>
                                                     "Not one of"   <>
                                                     (unwords . fmap toLabelString $ labelList)
@@ -164,7 +168,7 @@ toLabelColorString Duplicate            = dropHash "#6E3D5B"
 toLabelColorString Wontfix              = dropHash "#7F516D"
 toLabelColorString Ready                = dropHash "#138d3c"
 toLabelColorString InProgress           = dropHash "#00a538"
-
+toLabelColorString Clean                = dropHash "#3333CC"
 dropHash :: String -> String
 dropHash ('#':str) = str
 dropHash str = str
@@ -194,4 +198,5 @@ fromLabelColorString "6E3D5B" = Right Duplicate
 fromLabelColorString "7F516D" = Right Wontfix
 fromLabelColorString "138d3c" = Right Ready
 fromLabelColorString "00a538" = Right InProgress
+fromLabelColorString "3333CC" = Right Clean
 fromLabelColorString str = Left $ "String does not match a label color: " ++ str
