@@ -1,6 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Action.Internal.Label where
+module Action.Internal.Label (RepoLabel (..), addLabelsToRepo,
+                              fromLabelColorString, fromLabelString,
+                              toLabelColorString,labelStringPairList,
+                              toLabelString,labelList,toLabelStringPair) where
 import           Control.Applicative
+import           Control.Arrow        ((***))
 import           Data.ByteString      (ByteString)
 import           Data.Monoid          ((<>))
 import           Data.Traversable
@@ -9,18 +13,8 @@ import qualified Github.Issues.Labels as Github
 -- | Won't work till my repo is merged
 
 
-addLabelsToRepo
-  :: ByteString
-     -> ByteString
-     -> String
-     -> String
-     -> IO [Either Github.Error Github.IssueLabel]
-addLabelsToRepo authUser authPass repoUser repoName = traverse labelMaker labelStringPairList
-  where
-    labelMaker (c,l) = Github.createLabel auth repoUser repoName l c
-    auth = GithubBasicAuth authUser authPass
 
-
+-- | All the agreed apon labels for a github repo
 
 data RepoLabel = Bug
                  |Test
@@ -45,34 +39,26 @@ data RepoLabel = Bug
                  |InProgress
  deriving (Show,Eq,Ord)
 
+-- | Call to the network to add all Labels
 
+addLabelsToRepo
+  :: ByteString
+     -> ByteString
+     -> String
+     -> String
+     -> IO [Either Github.Error Github.IssueLabel]
+addLabelsToRepo authUser authPass repoUser repoName = traverse labelMaker labelStringPairList
+  where
+    labelMaker (c,l) = Github.createLabel auth repoUser repoName l c
+    auth = GithubBasicAuth authUser authPass
+
+-- | generate the Labels with their appropriate colors in string form
+-- to be inserted in the repo
 toLabelStringPair :: RepoLabel -> (String,String)
-toLabelStringPair Bug                       =  ("FF0000" ,"Bug"           )
-toLabelStringPair Test                      =  ("FF7400" ,"Test"          )
-toLabelStringPair Enhancement               =  ("00CFCF" ,"Enhancement"   )
-toLabelStringPair Documentation             =  ("009191" ,"Documentation" )
-toLabelStringPair Question                  =  ("C02A1A" ,"Question"      )
-toLabelStringPair UserInterface             =  ("6608C5" ,"User Interface"        )
-toLabelStringPair Performance               =  ("A76FDF" ,"Performance"           )
-toLabelStringPair MonitoringLogging         =  ("D50090" ,"Monitoring/Logging"    )
-toLabelStringPair NetworkIssue              =  ("C0A0E1" ,"Network Issue"         )
-toLabelStringPair Deployment                =  ("755B00" ,"Deployment"            )
-toLabelStringPair Regression                =  ("FFC600" ,"Regression"            )
-toLabelStringPair DependencyManagement      =  ("FFE075" ,"Dependency Management" )
-toLabelStringPair CustomerRequest           =  ("BAE5E8" ,"Customer Request"      )
-toLabelStringPair FieldServiceRequest       =  ("D3EbED" ,"Field Service Request" )
-toLabelStringPair NeedDiscussion            =  ("C0B51A" ,"Need Discussion" )
-toLabelStringPair NeedTestCase              =  ("8c884d" ,"Need Test Case"  )
-toLabelStringPair NeedInfo                  =  ("FFEE00" ,"Need Info"       )
-toLabelStringPair Duplicate                 =  ("6E3D5B" ,"Duplicate"       )
-toLabelStringPair Wontfix                   =  ("7F516D" ,"Wontfix"         )
-toLabelStringPair Ready                     =  ("138d3c" ,"Ready"           )
-toLabelStringPair InProgress                =  ("00a538" ,"In Progress"     )
+toLabelStringPair l = toLabelColorString *** toLabelString  $ (l,l)
 
 
-
-
-
+-- | generate pairs for every label
 labelStringPairList :: [(String, String)]
 labelStringPairList = toLabelStringPair <$>  labelList
 
@@ -99,6 +85,35 @@ labelList = [Bug
             ,Ready
             ,InProgress]
 
+-- | instead of show, a specific label converter is used
+-- | that way it can be controlled w/o all the ReadS and ShowS
+-- mechanics
+
+toLabelString :: RepoLabel -> String
+toLabelString Bug                       =  "Bug"
+toLabelString Test                      =  "Test"
+toLabelString Enhancement               =  "Enhancement"
+toLabelString Documentation             =  "Documentation"
+toLabelString Question                  =  "Question"
+toLabelString UserInterface             =  "User Interface"
+toLabelString Performance               =  "Performance"
+toLabelString MonitoringLogging         =  "Monitoring/Logging"
+toLabelString NetworkIssue              =  "Network Issue"
+toLabelString Deployment                =  "Deployment"
+toLabelString Regression                =  "Regression"
+toLabelString DependencyManagement      =  "Dependency Management"
+toLabelString CustomerRequest           =  "Customer Request"
+toLabelString FieldServiceRequest       =  "Field Service Request"
+toLabelString NeedDiscussion            =  "Need Discussion"
+toLabelString NeedTestCase              =  "Need Test Case"
+toLabelString NeedInfo                  =  "Need Info"
+toLabelString Duplicate                 =  "Duplicate"
+toLabelString Wontfix                   =  "Wontfix"
+toLabelString Ready                     =  "Ready"
+toLabelString InProgress                =  "In Progress"
+
+
+-- | inverse function, notice the either strings are strings afterall
 fromLabelString :: String -> Either String RepoLabel
 fromLabelString "Bug"                     =  Right Bug
 fromLabelString "Test"                    =  Right Test
@@ -123,31 +138,40 @@ fromLabelString "Ready"                   =  Right Ready
 fromLabelString "In Progress"             =  Right InProgress
 fromLabelString str                       =  Left  $ str <>
                                                     "Not one of"   <>
-                                                    (unwords . fmap show $ labelList)
+                                                    (unwords . fmap toLabelString $ labelList)
 
+-- |Each Label has a color
+-- the weird drop hash thing is just so I can use color modes in emacs easily
 toLabelColorString :: RepoLabel -> String
-toLabelColorString Bug                  =  "FF0000"
-toLabelColorString Test                 =  "FF7400"
-toLabelColorString Enhancement          =  "00CFCF"
-toLabelColorString Documentation        =  "009191"
-toLabelColorString Question             =  "C02A1A"
-toLabelColorString UserInterface        =  "6608C5"
-toLabelColorString Performance          =  "A76FDF"
-toLabelColorString MonitoringLogging    =  "D50090"
-toLabelColorString NetworkIssue         =  "C0A0E1"
-toLabelColorString Deployment           =  "755B00"
-toLabelColorString Regression           =  "FFC600"
-toLabelColorString DependencyManagement =  "FFE075"
-toLabelColorString CustomerRequest      =  "BAE5E8"
-toLabelColorString FieldServiceRequest  =  "D3EbED"
-toLabelColorString NeedDiscussion       =  "C0B51A"
-toLabelColorString NeedTestCase         =  "8c884d"
-toLabelColorString NeedInfo             =  "FFEE00"
-toLabelColorString Duplicate            =  "6E3D5B"
-toLabelColorString Wontfix              =  "7F516D"
-toLabelColorString Ready                =  "138d3c"
-toLabelColorString InProgress           =  "00a538"
+toLabelColorString Bug                  = dropHash "#FF0000"
+toLabelColorString Test                 = dropHash "#FF7400"
+toLabelColorString Enhancement          = dropHash "#00CFCF"
+toLabelColorString Documentation        = dropHash "#009191"
+toLabelColorString Question             = dropHash "#C02A1A"
+toLabelColorString UserInterface        = dropHash "#6608C5"
+toLabelColorString Performance          = dropHash "#A76FDF"
+toLabelColorString MonitoringLogging    = dropHash "#D50090"
+toLabelColorString NetworkIssue         = dropHash "#C0A0E1"
+toLabelColorString CustomerRequest      = dropHash "#BAE5E8"
+toLabelColorString FieldServiceRequest  = dropHash "#D3EbED"
+toLabelColorString Deployment           = dropHash "#755B00"
+toLabelColorString Regression           = dropHash "#FFC600"
+toLabelColorString DependencyManagement = dropHash "#FFE075"
+toLabelColorString NeedDiscussion       = dropHash "#C0B51A"
+toLabelColorString NeedTestCase         = dropHash "#8c884d"
+toLabelColorString NeedInfo             = dropHash "#FFEE00"
+toLabelColorString Duplicate            = dropHash "#6E3D5B"
+toLabelColorString Wontfix              = dropHash "#7F516D"
+toLabelColorString Ready                = dropHash "#138d3c"
+toLabelColorString InProgress           = dropHash "#00a538"
 
+dropHash :: String -> String
+dropHash ('#':str) = str
+dropHash str = str
+
+
+
+-- |These colors have labels
 fromLabelColorString :: String -> Either String RepoLabel
 fromLabelColorString "FF0000" = Right Bug
 fromLabelColorString "FF7400" = Right Test
@@ -170,5 +194,4 @@ fromLabelColorString "6E3D5B" = Right Duplicate
 fromLabelColorString "7F516D" = Right Wontfix
 fromLabelColorString "138d3c" = Right Ready
 fromLabelColorString "00a538" = Right InProgress
-fromLabelColorString ('#':str) = fromLabelColorString str
-fromLabelColorString str = Left "String does not match a label color: " ++ str
+fromLabelColorString str = Left $ "String does not match a label color: " ++ str
