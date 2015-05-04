@@ -57,9 +57,10 @@ Test-Suite spec
                       , test
   Ghc-Options:          -Wall
   Main-Is:              Spec.hs
-  Build-Depends:        base
+  Build-Depends:        QuickCheck
+                      , base
                       , bytestring
-                      , github 
+                      , github
                       , hspec
                       , template-haskell
 
