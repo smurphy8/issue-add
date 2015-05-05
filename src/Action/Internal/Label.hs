@@ -38,7 +38,7 @@ data RepoLabel = Bug
                  |Ready
                  |InProgress
                  |Clean
- deriving (Show,Eq,Ord)
+ deriving (Show,Eq,Ord,Enum)
 
 -- | Call to the network to add all Labels
 

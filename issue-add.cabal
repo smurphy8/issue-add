@@ -17,35 +17,41 @@ Library
   Exposed-Modules:      Action.Label
                         Action.Internal.Issue
                         Action.Internal.Label                        
-  Build-Depends:        base >= 4 && < 5
-                      , github == 0.13.1.7569                      
-                      , getopt-generics >= 0.6.3
-                      , trifecta
-                      , attoparsec
-                      , orgmode-parse
-                      , text
-                      , here
+  Build-Depends:        attoparsec
+                      , base >= 4 && < 5
                       , bytestring
+                      , getopt-generics >= 0.6.3
+                      , github == 0.13.1.7569
+                      , here
+                      , lens >= 4.9.1
+                      , orgmode-parse
+                      , shakespeare
                       , shakespeare-templates
-                      , shakespeare                
+                      , text
+                      , trifecta
+                      , unordered-containers >= 0.2.5.1
 Executable add-labels-with-auth
   Build-Depends:    base
+                  , bytestring
                   , getopt-generics >= 0.6.3
                   , github
-                  , bytestring
-                  , trifecta           
+                  , lens >= 4.9.1
                   , shakespeare
                   , shakespeare-templates
+                  , trifecta
+                  , unordered-containers >= 0.2.5.1
   Main-Is:        LabelMain.hs
   Hs-Source-Dirs: src
 
 Executable add-issues-with-auth
-  Build-Depends:    base
+  Build-Depends:    attoparsec
+                  , base
+                  , bytestring
                   , getopt-generics >= 0.6.3
                   , github
-                  , attoparsec
-                  , bytestring
+                  , lens >= 4.9.1
                   , trifecta
+                  , unordered-containers >= 0.2.5.1
   Main-Is:        IssueMain.hs
   Hs-Source-Dirs: src
 
@@ -64,9 +70,11 @@ Test-Suite spec
                       , github
                       , here
                       , hspec
+                      , lens >= 4.9.1
                       , orgmode-parse
                       , template-haskell
                       , text
+                      , unordered-containers >= 0.2.5.1
 
 Source-Repository head
   Type:                 git
