@@ -10,7 +10,7 @@ import           Data.Attoparsec.Text
 import           Data.ByteString                        (ByteString)
 import           Data.Either                            (rights)
 import qualified Data.HashMap.Strict                    as HM
-
+import           Data.Monoid                            ((<>))
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here
@@ -68,6 +68,32 @@ fromNewIssue  ni = HNewIssue
     repoLabels :: [RepoLabel]
     repoLabels = toListOf (_Just.folded._Right)
                                  ((fmap.fmap)  fromLabelString . newIssueLabels $ ni)
+
+-- | There are a few big missing pieces
+-- currently, the keyword portion is bound to Nothing
+toHeader :: HNewIssue -> Heading
+toHeader hni = Heading
+                 (Level 1)
+                 Nothing
+                 Nothing
+                 (hni ^. hNewIssueTitle)
+                 Nothing
+                 (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
+                 (sectionBody hni)
+                 []
+
+
+
+sectionBody hni = Section
+                    (Plns HM.empty)
+                    []
+                    issueProps
+                    paragraph
+  where
+     issueProps  = (views hNewIssueMilestone addToMap hni )
+     addToMap maybeInt = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty) maybeInt
+     paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
+
 
 fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
