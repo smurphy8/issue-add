@@ -4,12 +4,13 @@
 
 module Action.Internal.Issue where
 import           Action.Internal.Label
-import           Control.Applicative                    ((*>), (<$>), (<*>),
-                                                         (<|>))
+import           Control.Applicative                    ((*>), (<|>))
 import           Control.Lens
 import           Data.Attoparsec.Text
 import           Data.ByteString                        (ByteString)
 import           Data.Either                            (rights)
+import qualified Data.HashMap.Strict                    as HM
+
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here
@@ -17,6 +18,7 @@ import           Data.Text                              (Text, pack, unpack)
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (NewIssue (..))
 import qualified Github.Issues                          as Github
+import           Text.Read                              (readMaybe)
 
 {--  NewIssue Format example
       newiss = (Github.newIssue "A new issue") {
@@ -67,21 +69,27 @@ fromNewIssue  ni = HNewIssue
     repoLabels = toListOf (_Just.folded._Right)
                                  ((fmap.fmap)  fromLabelString . newIssueLabels $ ni)
 
-
+fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
-  |(level hdng == Level 1) = HNewIssue
-                                   issueTitle
-                                   issueBody
-                                   issueAssignee <$>
-                                   mileStones <*>
-                                   repoLabels
+  |(level hdng == Level 1) = Right $ HNewIssue
+                                           issueTitle
+                                           issueBody
+                                           issueAssignee
+                                           mileStones
+                                           repoLabels
+  | otherwise = Left $ "format Like: " ++ tstString
   where
     issueTitle = title hdng
     issueBody = sectionParagraph.section $ hdng
-    issueAssignee = undefined -- parseUser.sectionParagraph.section $ hdng
-    mileStones = parseMilestones .sectionProperties . section $ hdng
-    repoLabels = undefined -- rights $ fmap fromLabelString . tags $ hdng
-    parseMilestones = undefined
+    issueAssignee = parseUser.sectionParagraph.section $ hdng
+    mileStones = parseMilestone .sectionProperties . section $ hdng
+    repoLabels :: [RepoLabel]
+    repoLabels = rights $ fmap (fromLabelString . unpack) .
+                          tags $ hdng
+    parseMilestone :: Properties -> Maybe Int
+    parseMilestone mp = (HM.lookup "IssueNumber" mp) >>=
+                         readMaybe.unpack
+
 
 parseUser :: Text -> Text
 parseUser t = either (const "") id runParser
@@ -94,7 +102,10 @@ parseUser t = either (const "") id runParser
 -- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
 -- first version won't implement the issue number stuff
 tst :: Text
-tst = pack [here|
+tst = pack tstString
+
+tstString :: String
+tstString = [here|
 * TODO This is the issue title :HereIsALabel:
 :PROPERTIES:
 :IssueNumber: 123
