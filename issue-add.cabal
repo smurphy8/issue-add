@@ -33,13 +33,13 @@ Library
 Executable add-labels-with-auth
   Build-Depends:    base
                   , bytestring
-                  , getopt-generics >= 0.6.3
+                  , getopt-generics 
                   , github
-                  , lens >= 4.9.1
+                  , lens
                   , shakespeare
                   , shakespeare-templates
                   , trifecta
-                  , unordered-containers >= 0.2.5.1
+                  , unordered-containers 
   Main-Is:        LabelMain.hs
   Hs-Source-Dirs: src
 
@@ -47,11 +47,14 @@ Executable add-issues-with-auth
   Build-Depends:    attoparsec
                   , base
                   , bytestring
-                  , getopt-generics >= 0.6.3
+                  , getopt-generics 
                   , github
-                  , lens >= 4.9.1
+                  , orgmode-parse
+                  , here
+                  , text
+                  , lens
                   , trifecta
-                  , unordered-containers >= 0.2.5.1
+                  , unordered-containers 
   Main-Is:        IssueMain.hs
   Hs-Source-Dirs: src
 

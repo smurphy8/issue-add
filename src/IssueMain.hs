@@ -7,7 +7,6 @@ import           Data.ByteString.Char8
 import           Data.Typeable
 import           GHC.Generics
 import           System.Console.GetOpt.Generics
-import           System.Environment
 
 
 data Options = Options {
@@ -15,11 +14,18 @@ data Options = Options {
            , user     :: String
            , authUser :: String
            , pass     :: String
+           , orgFile  :: String
           }
  deriving (GHC.Generics.Generic,Typeable)
 
 instance System.Console.GetOpt.Generics.Generic Options
 instance HasDatatypeInfo Options
+
 main = do
   options <- getArguments :: IO Options
+  parseIssueFromDoc (pack.authUser $ options)
+                    (pack.pass $ options)
+                    (user options)
+                    (repo options)
+                    (orgFile options)
   return ()
