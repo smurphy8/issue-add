@@ -41,7 +41,10 @@ The best way to install is to copy the relevant binaries into your PATH
 <issue-body>
 '@'<assignee>
 ```
-
+## Add with
+```
+> add-issues-with-auth --auth-user="user" --pass="pass" --org-file="file" --user="repo-owner" --repo="repo"
+```
 
 ## Notes:
 * The labels you can use are defined above.
