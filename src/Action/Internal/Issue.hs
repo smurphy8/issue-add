@@ -52,6 +52,12 @@ toNewIssue hni = NewIssue
                  (views hNewIssueLabels  (Just . fmap toLabelString) hni )
 
 
+
+
+
+
+
+
 fromNewIssue :: NewIssue -> HNewIssue
 fromNewIssue  ni = HNewIssue
                      issueTitle
@@ -69,32 +75,17 @@ fromNewIssue  ni = HNewIssue
     repoLabels = toListOf (_Just.folded._Right)
                                  ((fmap.fmap)  fromLabelString . newIssueLabels $ ni)
 
--- | There are a few big missing pieces
--- currently, the keyword portion is bound to Nothing
-toHeader :: HNewIssue -> Heading
-toHeader hni = Heading
-                 (Level 1)
-                 Nothing
-                 Nothing
-                 (hni ^. hNewIssueTitle)
-                 Nothing
-                 (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
-                 (sectionBody hni)
-                 []
 
+-- | Document Conversion
 
-sectionBody :: HNewIssue -> Section
-sectionBody hni = Section
-                    (Plns HM.empty)
-                    []
-                    issueProps
-                    paragraph
-  where
-     issueProps  = views hNewIssueMilestone addToMap hni
-     addToMap = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty)
-     paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
+fromDocument :: Document -> [HNewIssue]
+fromDocument = rights . fmap fromHeader . documentHeadings
 
+toDocument :: [HNewIssue] -> Document
+toDocument hnis = Document "" (fmap toHeader hnis)
 
+-- | It would be nice to make an exact round trip between
+-- headers and Issues but it can't quite work like that
 fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
   |level hdng == Level 1 = Right $ HNewIssue
@@ -124,6 +115,39 @@ parseUser t = either (const "") id runParser
    userParser = (char '@' *> nameParse) <|> (anyChar *> userParser)
    nameParse = do ltrs <- many' letter
                   return . pack  $ '@':ltrs
+
+
+
+
+-- | There are a few big missing pieces
+-- currently, the keyword portion is bound to Nothing
+toHeader :: HNewIssue -> Heading
+toHeader hni = Heading
+                 (Level 1)
+                 Nothing
+                 Nothing
+                 (hni ^. hNewIssueTitle)
+                 Nothing
+                 (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
+                 (toSectionBody hni)
+                 []
+
+
+
+-- | names in sections are present to make it easier to read
+-- | the issues enter the Section as Map "IssueNumber" Int
+toSectionBody :: HNewIssue -> Section
+toSectionBody hni = Section {
+                       sectionPlannings = Plns HM.empty
+                       , sectionClocks = []
+                       , sectionProperties = issueProps
+                       , sectionParagraph = paragraph }
+  where
+     issueProps  = views hNewIssueMilestone addToMap hni
+     addToMap = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty)
+     paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
+
+
 -- | Example
 -- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
 -- first version won't implement the issue number stuff
@@ -132,13 +156,15 @@ tst = pack tstString
 
 tstString :: String
 tstString = [here|
-* TODO This is the issue title :HereIsALabel:
+* TODO This is the issue title :Bug:
 :PROPERTIES:
 :IssueNumber: 123
 :END:
 Here is the message body
 * Here is another issue :HereIsAnotherLabel:
 Here is another body
+* Here is another issue :Clean:
+I would like this to be a working thing
 
 |]
 
