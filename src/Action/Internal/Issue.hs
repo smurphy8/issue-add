@@ -15,6 +15,7 @@ import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here                       (here)
 import           Data.Text                              (Text, pack, unpack)
+import qualified Data.Text                              as T
 import qualified Data.Text.IO                           as TIO
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (NewIssue (..))
@@ -47,18 +48,15 @@ makeLenses ''HNewIssue
 toNewIssue :: HNewIssue -> NewIssue
 toNewIssue hni = NewIssue
                  (views hNewIssueTitle unpack hni)
-                 (views hNewIssueBody (Just . unpack) hni)
-                 (views hNewIssueAssignee (Just . unpack) hni)
+                 (views hNewIssueBody (fmap unpack.maybeEmpty) hni)
+                 (views hNewIssueAssignee (fmap unpack.maybeEmpty ) hni)
                  (view hNewIssueMilestone hni)
                  (views hNewIssueLabels  (Just . fmap toLabelString) hni )
 
-
-
-
-
-
-
-
+ where
+  maybeEmpty t = if T.null t
+                    then Nothing
+                    else Just t
 fromNewIssue :: NewIssue -> HNewIssue
 fromNewIssue  ni = HNewIssue
                      issueTitle
@@ -166,6 +164,9 @@ Here is the message body
 Here is another body
 * Here is another issue :Clean:
 I would like this to be a working thing
+* TODO Generate new issue :Bug:
+This is a test of issue generation
+
 
 |]
 
