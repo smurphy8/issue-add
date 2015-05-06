@@ -7,7 +7,7 @@ If a command is expecting authorization strings it will be suffixed with-auth th
 The best way to install is to copy the relevant binaries into your PATH
 ## Usage
 + add-labels-with-auth
-  - give a user and a repo and it will add a default set of descriptive labels
+  - **give a user and a repo and it will add a default set of descriptive labels**
   - "Bug"                    
   - "Test"                   
   - "Enhancement"            
