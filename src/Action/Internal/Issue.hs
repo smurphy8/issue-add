@@ -13,7 +13,7 @@ import qualified Data.HashMap.Strict                    as HM
 import           Data.Monoid                            ((<>))
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
-import           Data.String.Here
+import           Data.String.Here                       (here)
 import           Data.Text                              (Text, pack, unpack)
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (NewIssue (..))
@@ -83,21 +83,21 @@ toHeader hni = Heading
                  []
 
 
-
+sectionBody :: HNewIssue -> Section
 sectionBody hni = Section
                     (Plns HM.empty)
                     []
                     issueProps
                     paragraph
   where
-     issueProps  = (views hNewIssueMilestone addToMap hni )
-     addToMap maybeInt = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty) maybeInt
+     issueProps  = views hNewIssueMilestone addToMap hni
+     addToMap = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty)
      paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
 
 
 fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
-  |(level hdng == Level 1) = Right $ HNewIssue
+  |level hdng == Level 1 = Right $ HNewIssue
                                            issueTitle
                                            issueBody
                                            issueAssignee
@@ -113,7 +113,7 @@ fromHeader hdng
     repoLabels = rights $ fmap (fromLabelString . unpack) .
                           tags $ hdng
     parseMilestone :: Properties -> Maybe Int
-    parseMilestone mp = (HM.lookup "IssueNumber" mp) >>=
+    parseMilestone mp = HM.lookup "IssueNumber" mp >>=
                          readMaybe.unpack
 
 
@@ -167,12 +167,12 @@ parseOrgMode = parseOnly (parseDocument keywords)
 -- | Printers
 formatIssue :: Github.Issue -> String
 formatIssue issue =
-   (Github.githubOwnerLogin $ Github.issueUser issue) ++
+   (Github.githubOwnerLogin . Github.issueUser $ issue) ++
     " opened this issue " ++
-    (show $ Github.fromGithubDate $ Github.issueCreatedAt issue) ++ "\n" ++
-    (Github.issueState issue) ++ " with " ++
-    (show $ Github.issueComments issue) ++ " comments" ++ "\n\n" ++
-    (Github.issueTitle issue)
+    (show . Github.fromGithubDate . Github.issueCreatedAt $ issue) ++ "\n" ++
+    Github.issueState issue ++ " with " ++
+    (show . Github.issueComments $ issue) ++ " comments\n\n" ++
+    Github.issueTitle issue
 tst2 :: Text
 tst2 = pack [here|
 ** TODO [#B] Polish Poetry Essay [25%] :HOMEWORK:POLISH:WRITING:
