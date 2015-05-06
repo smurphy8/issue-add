@@ -15,6 +15,7 @@ import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here                       (here)
 import           Data.Text                              (Text, pack, unpack)
+import qualified Data.Text.IO                           as TIO
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (NewIssue (..))
 import qualified Github.Issues                          as Github
@@ -180,8 +181,19 @@ createNewIssue user pass owner repo newiss= do
                     possibleIssue
 
 
+parseIssueFromDoc :: ByteString -> ByteString -> String -> String -> FilePath -> IO ()
+parseIssueFromDoc user pass owner repo fp = do
+  doc <- TIO.readFile fp
+  let auth = Github.GithubBasicAuth user pass
+      eitherNewIssues = fmap (fmap toNewIssue.fromDocument) . parseOrgMode $ doc
 
-
+  case eitherNewIssues of
+    Left str -> fail str
+    Right newIssues -> do
+     possibleIssue <- Github.createIssue auth owner repo `traverse` newIssues
+     putStrLn $ either (\e -> "Error: " ++ show e)
+                     (concat . fmap formatIssue)
+                     (sequence possibleIssue)
 -- |Keywords
 keywords :: [Text]
 keywords = ["TODO","DONE"]

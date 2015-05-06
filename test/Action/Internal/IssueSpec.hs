@@ -3,7 +3,7 @@
 module Action.Internal.IssueSpec (main, spec) where
 
 import           Action.Internal.Issue
-ximport           Action.Internal.Label (RepoLabel (..), fromLabelColorString,
+import           Action.Internal.Label (RepoLabel (..), fromLabelColorString,
                                         fromLabelString, labelList,
                                         toLabelColorString, toLabelString)
 import           Control.Applicative
@@ -15,9 +15,9 @@ import           Data.Text             (pack)
 import           Language.Haskell.TH   (nameBase)
 import           Test.Hspec
 import           Test.QuickCheck
+
+
 -- | Gen Some Data
-
-
 instance Arbitrary RepoLabel where
   arbitrary = elements labelList
   shrink lbl
