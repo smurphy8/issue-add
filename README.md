@@ -33,17 +33,21 @@ The best way to install is to copy the relevant binaries into your PATH
 
 
 + add-issues-with-auth
-  - give a user and a repo, plus a .org file  It will parse it with the folloing rules:
+  - give a user and a repo, plus a .org file  It will parse it with the following rules:
 
 ``` org-mode
 
-* TODO <text> :<label>:
-<text-area>
+* TODO <issue-title> :<label>:
+<issue-body>
 '@'<assignee>
-
-
 ```
-## Note: the labels you can use are defined above.
+
+
+## Notes:
+* The labels you can use are defined above.
+* the <text> represents the issue title
+* the <issue-body> represents the issue form
+* only 1 assignee per user
 
 ## How to run tests
 
