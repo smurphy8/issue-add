@@ -2,7 +2,10 @@ Hidden Issues file for this repo (also serves as a test)
 
 
 
-* TODO Generate new issue :Bug:
-This is a test of issue generation  
 
 
+
+* DONE Make Done keyword ignore issue in list                   :Enhancement:
+Eventually I want more interactive work with issues
+but for now.. I just want the issues to be ignored when they are 
+marked done.  

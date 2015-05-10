@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-
 module Action.Internal.IssueSpec (main, spec) where
 
 import           Action.Internal.Issue

@@ -32,7 +32,6 @@ import           Text.Read                              (readMaybe)
 
 -- | DataTypes
 
-
 -- | 'HNewIssue' reflects the places where a datatype has been created
 -- to facilitate type checking before posting a new issue.
 
@@ -84,15 +83,17 @@ toDocument :: [HNewIssue] -> Document
 toDocument hnis = Document "" (fmap toHeader hnis)
 
 -- | It would be nice to make an exact round trip between
--- headers and Issues but it can't quite work like that
+-- |headers and Issues but it can't quite work like that
+-- New Issues start with a TODO
+-- Issues starting with anything else are ignored
 fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
-  |level hdng == Level 1 = Right $ HNewIssue
-                                           issueTitle
-                                           issueBody
-                                           issueAssignee
-                                           mileStones
-                                           repoLabels
+  |validNewIssueHeading hdng = Right $ HNewIssue
+                                                                    issueTitle
+                                                                    issueBody
+                                                                    issueAssignee
+                                                                    mileStones
+                                                                    repoLabels
   | otherwise = Left $ "format Like: " ++ tstString
   where
     issueTitle = title hdng
@@ -105,7 +106,9 @@ fromHeader hdng
     parseMilestone :: Properties -> Maybe Int
     parseMilestone mp = HM.lookup "IssueNumber" mp >>=
                          readMaybe.unpack
-
+    validNewIssueHeading hdng' = level hdng' == Level 1  &&
+                                 maybe False (\kw -> StateKeyword "TODO" == kw)
+                                 (keyword hdng')
 
 parseUser :: Text -> Text
 parseUser t = either (const "") id runParser
@@ -123,7 +126,7 @@ parseUser t = either (const "") id runParser
 toHeader :: HNewIssue -> Heading
 toHeader hni = Heading
                  (Level 1)
-                 Nothing
+                 (Just . StateKeyword $ "TODO")
                  Nothing
                  (hni ^. hNewIssueTitle)
                  Nothing
@@ -155,6 +158,8 @@ tst = pack tstString
 
 tstString :: String
 tstString = [here|
+
+sdfjsdf
 * TODO This is the issue title :Bug:
 :PROPERTIES:
 :IssueNumber: 123
@@ -166,6 +171,9 @@ Here is another body
 I would like this to be a working thing
 * TODO Generate new issue :Bug:
 This is a test of issue generation
+* TODO Add org-file issue tracking :Enhancement: :User Interface:
+It would be nice if things like milestones
+would be automatically added in
 
 
 |]
