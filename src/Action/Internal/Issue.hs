@@ -121,8 +121,11 @@ issueAssignee hdng
   | otherwise = ""
  where
    subs = subHeadings hdng
-   assignedSubs = filter (maybe False (== StateKeyword "ASSIGN") . keyword ) subs
+   assignedSubs = filter assignmentHeadingFilter subs
    cond = null assignedSubs
+   assignmentHeadingFilter heading'
+     |isLevel heading'. Level $ 2 = maybe False (== StateKeyword "ASSIGN") . keyword $ heading'
+     |otherwise = False
 
 
 
