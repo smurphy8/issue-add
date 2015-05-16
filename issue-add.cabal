@@ -1,5 +1,5 @@
 Name:                   issue-add
-Version:                0.0.2
+Version:                0.0.3
 Author:                 Scott Murphy <scottmurphy09@gmail.com>
 Maintainer:             Scott Murphy <scottmurphy09@gmail.com>
 License:                BSD3
@@ -21,7 +21,7 @@ Library
                       , base >= 4 && < 5
                       , bytestring
                       , getopt-generics >= 0.6.3
-                      , github == 0.13.1.7569
+                      , github >= 0.13.2 && < 0.14.0
                       , here
                       , lens >= 4.9.1
                       , orgmode-parse

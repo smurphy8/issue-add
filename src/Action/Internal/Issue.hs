@@ -43,7 +43,6 @@ data HNewIssue = HNewIssue { _hNewIssueTitle     :: Text
   deriving (Eq,Ord,Show)
 
 makeLenses ''HNewIssue
-
 toNewIssue :: HNewIssue -> NewIssue
 toNewIssue hni = NewIssue
                  (views hNewIssueTitle unpack hni)
@@ -60,14 +59,14 @@ fromNewIssue :: NewIssue -> HNewIssue
 fromNewIssue  ni = HNewIssue
                      issueTitle
                      issueBody
-                     issueAssignee
+                     addIssueAssignee
                      maybeIssueMilestone
                      repoLabels
 
   where
     issueTitle = pack.newIssueTitle $ ni
     issueBody = maybe "" pack (newIssueBody  ni)
-    issueAssignee = maybe "" pack (newIssueAssignee  ni)
+    addIssueAssignee = maybe "" pack (newIssueAssignee  ni)
     maybeIssueMilestone = newIssueMilestone ni
     repoLabels :: [RepoLabel]
     repoLabels = toListOf (_Just.folded._Right)
@@ -91,24 +90,36 @@ fromHeader hdng
   |validNewIssueHeading hdng = Right $ HNewIssue
                                                                     issueTitle
                                                                     issueBody
-                                                                    issueAssignee
+                                                                    (issueAssignee hdng)
                                                                     mileStones
                                                                     repoLabels
   | otherwise = Left $ "format Like: " ++ tstString
   where
     issueTitle = title hdng
     issueBody = sectionParagraph.section $ hdng
-    issueAssignee = parseUser.sectionParagraph.section $ hdng
     mileStones = parseMilestone .sectionProperties . section $ hdng
     repoLabels :: [RepoLabel]
     repoLabels = rights $ fmap (fromLabelString . unpack) .
                           tags $ hdng
     parseMilestone :: Properties -> Maybe Int
-    parseMilestone mp = HM.lookup "IssueNumber" mp >>=
+    parseMilestone mp = HM.lookup "MileStone" mp >>=
                          readMaybe.unpack
     validNewIssueHeading hdng' = level hdng' == Level 1  &&
                                  maybe False (\kw -> StateKeyword "TODO" == kw)
                                  (keyword hdng')
+
+-- |Issue Assignees must be added at the second level heading
+--  with Keyword ASSIGN
+issueAssignee :: Heading -> Text
+issueAssignee hdng
+   | not cond  = parseUser.sectionParagraph.section $ hdng
+  | otherwise = ""
+ where
+   subs = subHeadings hdng
+   assignedSubs = filter (maybe False (== StateKeyword "ASSIGN") . keyword ) subs
+   cond = null assignedSubs
+
+
 
 parseUser :: Text -> Text
 parseUser t = either (const "") id runParser
@@ -137,7 +148,7 @@ toHeader hni = Heading
 
 
 -- | names in sections are present to make it easier to read
--- | the issues enter the Section as Map "IssueNumber" Int
+-- | the milestones enter the Section as Map "MileStone" Int
 toSectionBody :: HNewIssue -> Section
 toSectionBody hni = Section {
                        sectionPlannings = Plns HM.empty
@@ -146,7 +157,7 @@ toSectionBody hni = Section {
                        , sectionParagraph = paragraph }
   where
      issueProps  = views hNewIssueMilestone addToMap hni
-     addToMap = maybe HM.empty (\i -> HM.insert "IssueNumber" (pack.show $ i) HM.empty)
+     addToMap = maybe HM.empty (\i -> HM.insert "MileStone" (pack.show $ i) HM.empty)
      paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
 
 
@@ -162,12 +173,12 @@ tstString = [here|
 sdfjsdf
 * TODO This is the issue title :Bug:
 :PROPERTIES:
-:IssueNumber: 123
+:MileStone: 123
 :END:
 Here is the message body
-* Here is another issue :HereIsAnotherLabel:
+* TODO Here is another issue :HereIsAnotherLabel:
 Here is another body
-* Here is another issue :Clean:
+* TODO Here is another issue :Clean:
 I would like this to be a working thing
 * TODO Generate new issue :Bug:
 This is a test of issue generation
@@ -205,7 +216,7 @@ parseIssueFromDoc user pass owner repo fp = do
                      (sequence possibleIssue)
 -- |Keywords
 keywords :: [Text]
-keywords = ["TODO","DONE"]
+keywords = ["TODO","DONE","ASSIGN"]
 
 -- |Parser
 parseOrgMode :: Text -> Either String Document

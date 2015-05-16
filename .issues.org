@@ -1,4 +1,47 @@
+
+* This is an issue file for use with the 'issue-add' plugins
+  Create an Issue with:
+ * TODO <issue-name> :<label1>: :<label2>:
+  <description>
+   
+* Valid Labels
+  - "Bug"                  
+  - "Test"                 
+  - "Enhancement"          
+  - "Documentation"        
+  - "Question"             
+  - "User Interface"       
+  - "Performance"          
+  - "Monitoring/Logging"   
+  - "Network Issue"        
+  - "Deployment"           
+  - "Regression"           
+  - "Dependency Management"
+  - "Customer Request"     
+  - "Field Service Request"
+  - "Need Discussion"      
+  - "Need Test Case"       
+  - "Need Info"            
+  - "Duplicate"            
+  - "Wontfix"              
+  - "Ready"                
+  - "In Progress"          
+  - "Clean"                
+    
+    
+* Project  
+  
+  
+* New Issues
+
 Hidden Issues file for this repo (also serves as a test)
+
+
+* TODO Thefirst snippet issue :Bug:User Interface
+  Here's a description
+  
+  
+
 
 
 
