@@ -137,9 +137,7 @@ parseUser t = either (const "") id runParser
 
 
 
-
--- | There are a few big missing pieces
--- currently, the keyword portion is bound to Nothing
+-- | toHeader produces a TODO task with assignment to a user and other things
 toHeader :: HNewIssue -> Heading
 toHeader hni = Heading {
                    level = Level 1
@@ -149,18 +147,21 @@ toHeader hni = Heading {
                  , stats = Nothing
                  , tags = views hNewIssueLabels (fmap (pack.toLabelString)) hni
                  , section = toSectionBody hni
-                 , subHeadings =[toAssignmentHeading hni]}
+                 , subHeadings = toAssignmentHeading hni }
           where
-           toAssignmentHeading :: HNewIssue -> Heading
-           toAssignmentHeading hni' =  Heading { level = Level 2
-                                              , keyword = Just . StateKeyword $ "ASSIGN"
-                                              , priority = Nothing
-                                              , title = hni' ^. hNewIssueTitle
-                                              , stats = Nothing
-                                              , tags = []
-                                              , section = emptySection
-                                              , subHeadings = []  }
-
+           toAssignmentHeading :: HNewIssue -> [Heading]
+           toAssignmentHeading hni'
+              | not . T.null $ assignee = [Heading { level = Level 2
+                                                         , keyword = Just . StateKeyword $ "ASSIGN"
+                                                         , priority = Nothing
+                                                         , title = assignee
+                                                         , stats = Nothing
+                                                         , tags = []
+                                                         , section = emptySection
+                                                         , subHeadings = []  }]
+              | otherwise = []
+             where
+               assignee = hni' ^. hNewIssueAssignee
 -- | default section useful for rendering
 emptySection :: Section
 emptySection = Section {
