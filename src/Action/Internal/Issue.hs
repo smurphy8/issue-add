@@ -10,7 +10,7 @@ import           Data.Attoparsec.Text
 import           Data.ByteString                        (ByteString)
 import           Data.Either                            (rights)
 import qualified Data.HashMap.Strict                    as HM
-import           Data.Monoid                            ((<>))
+-- import           Data.Monoid                            ((<>))
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 import           Data.String.Here                       (here)
@@ -113,12 +113,10 @@ fromHeader hdng
 
 -- |Issue Assignees must be added at the second level heading
 --  with Keyword ASSIGN
---  the level 2 is implicit because this function is called from a level 1 heading
---  if you call it from somewhere else... well you were warned
 issueAssignee :: Heading -> Text
 issueAssignee hdng
-   | not cond  = parseUser.sectionParagraph.section $ hdng
-  | otherwise = ""
+   | not cond  = parseUser.title . head $ assignedSubs --head is checked in cond I feel this is okay
+   | otherwise = ""                                    -- I could be talked out of it ...
  where
    subs = subHeadings hdng
    assignedSubs = filter assignmentHeadingFilter subs
@@ -134,7 +132,7 @@ parseUser t = either (const "") id runParser
  where
    runParser = parseOnly userParser t
    userParser = (char '@' *> nameParse) <|> (anyChar *> userParser)
-   nameParse = do ltrs <- many' letter
+   nameParse = do ltrs <- many' (letter <|> digit)
                   return . pack  $ '@':ltrs
 
 
@@ -143,16 +141,33 @@ parseUser t = either (const "") id runParser
 -- | There are a few big missing pieces
 -- currently, the keyword portion is bound to Nothing
 toHeader :: HNewIssue -> Heading
-toHeader hni = Heading
-                 (Level 1)
-                 (Just . StateKeyword $ "TODO")
-                 Nothing
-                 (hni ^. hNewIssueTitle)
-                 Nothing
-                 (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
-                 (toSectionBody hni)
-                 []
+toHeader hni = Heading {
+                   level = (Level 1)
+                 , keyword = (Just . StateKeyword $ "TODO")
+                 , priority = Nothing
+                 , title = (hni ^. hNewIssueTitle)
+                 , stats = Nothing
+                 , tags = (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
+                 , section = (toSectionBody hni)
+                 , subHeadings =[toAssignmentHeading hni]}
+          where
+           toAssignmentHeading :: HNewIssue -> Heading
+           toAssignmentHeading hni' =  Heading { level = Level 2
+                                              , keyword = (Just . StateKeyword $ "ASSIGN")
+                                              , priority = Nothing
+                                              , title = (hni' ^. hNewIssueTitle)
+                                              , stats = Nothing
+                                              , tags = []
+                                              , section = emptySection
+                                              , subHeadings = []  }
 
+-- | default section useful for rendering
+emptySection :: Section
+emptySection = Section {
+                       sectionPlannings = Plns HM.empty
+                     , sectionClocks = []
+                     , sectionProperties = HM.empty
+                    , sectionParagraph = "" }
 
 
 -- | names in sections are present to make it easier to read
@@ -166,7 +181,9 @@ toSectionBody hni = Section {
   where
      issueProps  = views hNewIssueMilestone addToMap hni
      addToMap = maybe HM.empty (\i -> HM.insert "MileStone" (pack.show $ i) HM.empty)
-     paragraph = (hni ^. hNewIssueAssignee) <> (hni ^. hNewIssueBody)
+     paragraph = hni ^. hNewIssueBody
+
+
 
 
 -- | Example
@@ -180,6 +197,7 @@ tstString = [here|
 
 sdfjsdf
 * TODO This is the issue title :Bug:
+** ASSIGN @smurphy8
 :PROPERTIES:
 :MileStone: 123
 :END:
