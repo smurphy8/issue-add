@@ -142,20 +142,20 @@ parseUser t = either (const "") id runParser
 -- currently, the keyword portion is bound to Nothing
 toHeader :: HNewIssue -> Heading
 toHeader hni = Heading {
-                   level = (Level 1)
-                 , keyword = (Just . StateKeyword $ "TODO")
+                   level = Level 1
+                 , keyword = Just . StateKeyword $ "TODO"
                  , priority = Nothing
-                 , title = (hni ^. hNewIssueTitle)
+                 , title = hni ^. hNewIssueTitle
                  , stats = Nothing
-                 , tags = (views hNewIssueLabels (fmap (pack.toLabelString)) hni)
-                 , section = (toSectionBody hni)
+                 , tags = views hNewIssueLabels (fmap (pack.toLabelString)) hni
+                 , section = toSectionBody hni
                  , subHeadings =[toAssignmentHeading hni]}
           where
            toAssignmentHeading :: HNewIssue -> Heading
            toAssignmentHeading hni' =  Heading { level = Level 2
-                                              , keyword = (Just . StateKeyword $ "ASSIGN")
+                                              , keyword = Just . StateKeyword $ "ASSIGN"
                                               , priority = Nothing
-                                              , title = (hni' ^. hNewIssueTitle)
+                                              , title = hni' ^. hNewIssueTitle
                                               , stats = Nothing
                                               , tags = []
                                               , section = emptySection
