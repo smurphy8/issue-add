@@ -104,12 +104,17 @@ fromHeader hdng
     parseMilestone :: Properties -> Maybe Int
     parseMilestone mp = HM.lookup "MileStone" mp >>=
                          readMaybe.unpack
-    validNewIssueHeading hdng' = level hdng' == Level 1  &&
+    validNewIssueHeading hdng' = isLevel hdng' (Level 1)  &&
                                  maybe False (\kw -> StateKeyword "TODO" == kw)
                                  (keyword hdng')
 
+
+
+
 -- |Issue Assignees must be added at the second level heading
 --  with Keyword ASSIGN
+--  the level 2 is implicit because this function is called from a level 1 heading
+--  if you call it from somewhere else... well you were warned
 issueAssignee :: Heading -> Text
 issueAssignee hdng
    | not cond  = parseUser.sectionParagraph.section $ hdng
@@ -237,6 +242,14 @@ tst2 = pack [here|
 done
 
 |]
+
+
+-- | Filters and checks
+
+
+-- | Respecting the NewType, check the level of the thing
+isLevel :: Heading -> Data.OrgMode.Parse.Types.Level -> Bool
+isLevel hdng l = (level hdng) == l
 
 -- | Types
 
