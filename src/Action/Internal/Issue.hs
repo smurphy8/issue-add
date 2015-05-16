@@ -18,7 +18,8 @@ import           Data.Text                              (Text, pack, unpack)
 import qualified Data.Text                              as T
 import qualified Data.Text.IO                           as TIO
 import qualified Github.Auth                            as Github
-import           Github.Issues                          (NewIssue (..))
+import           Github.Issues                          (Issue (..),
+                                                         NewIssue (..))
 import qualified Github.Issues                          as Github
 import           Text.Read                              (readMaybe)
 
@@ -90,7 +91,7 @@ fromHeader hdng
   |validNewIssueHeading hdng = Right $ HNewIssue
                                                                     issueTitle
                                                                     issueBody
-                                                                    (issueAssignee hdng)
+                                                                    (headingToIssueAssignee hdng)
                                                                     mileStones
                                                                     repoLabels
   | otherwise = Left $ "format Like: " ++ tstString
@@ -113,8 +114,8 @@ fromHeader hdng
 
 -- |Issue Assignees must be added at the second level heading
 --  with Keyword ASSIGN
-issueAssignee :: Heading -> Text
-issueAssignee hdng
+headingToIssueAssignee :: Heading -> Text
+headingToIssueAssignee hdng
    | not cond  = parseUser.title . head $ assignedSubs --head is checked in cond I feel this is okay
    | otherwise = ""                                    -- I could be talked out of it ...
  where
