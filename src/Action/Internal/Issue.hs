@@ -17,12 +17,13 @@ import           Data.String.Here                       (here)
 import           Data.Text                              (Text, pack, unpack)
 import qualified Data.Text                              as T
 import qualified Data.Text.IO                           as TIO
+import           Data.Time
 import qualified Github.Auth                            as Github
 import           Github.Issues                          (Issue (..),
                                                          NewIssue (..))
 import qualified Github.Issues                          as Github
+import qualified System.IO                              as IO
 import           Text.Read                              (readMaybe)
-
 {--  NewIssue Format example
       newiss = (Github.newIssue "A new issue") {
           Github.newIssueBody = Just "Issue description text goes here"
@@ -33,9 +34,72 @@ import           Text.Read                              (readMaybe)
 
 -- | DataTypes
 
--- | 'HNewIssue' reflects the places where a datatype has been created
--- to facilitate type checking before posting a new issue.
 
+-- | It might seem excessive to write types down to model each thing... but I just
+-- want the flexibility to add meta info and other helpful things w/o depending on the
+-- github api.
+-- the 'H' is for 'Heading'
+-- the 'OrgIssue' is for orgmode there are close ties to the data types used in 'Github'
+
+data OrgIssueOwnerType = GithubUser | GithubOrganization
+  deriving (Eq, Ord, Show)
+
+data OrgIssueOwner = OrgIssueOwner {
+                          _ownerType       :: OrgIssueOwnerType
+                        , _avatarUrl       :: Text
+                        , _ownerLogin      :: Text
+                        , _ownerUrl        :: Text
+                        , _ownerId         :: Int
+                        , _ownerGravatarId :: Maybe Text }
+  deriving (Eq, Ord, Show)
+
+
+-- | 'HIssue'
+data HIssue
+  = HIssue {  _hIssueClosedAt    :: Maybe UTCTime
+            , _hIssueUpdatedAt   :: Maybe UTCTime
+            , _hIssueEventsUrl   :: Text
+            , _hIssueHtmlUrl     :: Maybe Text
+            , _hIssueClosedBy    :: Maybe Text
+            , _hIssueLabels      :: [RepoLabel]
+            , _hIssueNumber      :: Int
+            , _hIssueAssignee    :: Maybe Text
+            , _hIssueUser        :: Text
+            , _hIssueTitle       :: Text
+            , _hIssuePullRequest :: Maybe Github.PullRequestReference
+            , _hIssueUrl         :: String
+            , _hIssueCreatedAt   :: Github.GithubDate
+            , _hIssueBody        :: Maybe String
+            , _hIssueState       :: String
+            , _hIssueId          :: Int
+            , _hIssueComments    :: Int
+            , _hIssueMilestone   :: Maybe Github.Milestone}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- | 'HNewIssue' reflects the places where a datatype has been created 'H' for heading
+-- to facilitate type checking before posting a new issue.
 data HNewIssue = HNewIssue { _hNewIssueTitle     :: Text
                            , _hNewIssueBody      :: Text
                            , _hNewIssueAssignee  :: Text
@@ -58,16 +122,16 @@ toNewIssue hni = NewIssue
                     else Just t
 fromNewIssue :: NewIssue -> HNewIssue
 fromNewIssue  ni = HNewIssue
-                     issueTitle
-                     issueBody
-                     addIssueAssignee
+                     hnIssueTitle
+                     hnIssueBody
+                     hnAddIssueAssignee
                      maybeIssueMilestone
                      repoLabels
 
   where
-    issueTitle = pack.newIssueTitle $ ni
-    issueBody = maybe "" pack (newIssueBody  ni)
-    addIssueAssignee = maybe "" pack (newIssueAssignee  ni)
+    hnIssueTitle = pack.newIssueTitle $ ni
+    hnIssueBody = maybe "" pack (newIssueBody  ni)
+    hnAddIssueAssignee = maybe "" pack (newIssueAssignee  ni)
     maybeIssueMilestone = newIssueMilestone ni
     repoLabels :: [RepoLabel]
     repoLabels = toListOf (_Just.folded._Right)
@@ -89,15 +153,15 @@ toDocument hnis = Document "" (fmap toHeader hnis)
 fromHeader :: Heading -> Either String HNewIssue
 fromHeader hdng
   |validNewIssueHeading hdng = Right $ HNewIssue
-                                                                    issueTitle
-                                                                    issueBody
+                                                                    hnIssueTitle
+                                                                    hnIssueBody
                                                                     (headingToIssueAssignee hdng)
                                                                     mileStones
                                                                     repoLabels
   | otherwise = Left $ "format Like: " ++ tstString
   where
-    issueTitle = title hdng
-    issueBody = sectionParagraph.section $ hdng
+    hnIssueTitle = title hdng
+    hnIssueBody = sectionParagraph.section $ hdng
     mileStones = parseMilestone .sectionProperties . section $ hdng
     repoLabels :: [RepoLabel]
     repoLabels = rights $ fmap (fromLabelString . unpack) .
@@ -224,9 +288,11 @@ createNewIssue
 createNewIssue user pass owner repo newiss= do
   let auth = Github.GithubBasicAuth user pass
   possibleIssue <- Github.createIssue auth owner repo newiss
-  putStrLn $ either (\e -> "Error: " ++ show e)
-                    formatIssue
-                    possibleIssue
+  either (\e -> IO.hPutStrLn IO.stderr $ "Error: " ++ show e)
+         (putStrLn . formatIssue)
+         possibleIssue
+
+
 
 
 parseIssueFromDoc :: ByteString -> ByteString -> String -> String -> FilePath -> IO ()
