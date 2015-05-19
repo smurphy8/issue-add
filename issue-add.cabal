@@ -28,18 +28,20 @@ Library
                       , shakespeare
                       , shakespeare-templates
                       , text
+                      , time >= 1.4.2
                       , trifecta
                       , unordered-containers >= 0.2.5.1
 Executable add-labels-with-auth
   Build-Depends:    base
                   , bytestring
-                  , getopt-generics 
+                  , getopt-generics
                   , github
                   , lens
                   , shakespeare
                   , shakespeare-templates
+                  , time >= 1.4.2
                   , trifecta
-                  , unordered-containers 
+                  , unordered-containers
   Main-Is:        LabelMain.hs
   Hs-Source-Dirs: src
 
@@ -47,14 +49,15 @@ Executable add-issues-with-auth
   Build-Depends:    attoparsec
                   , base
                   , bytestring
-                  , getopt-generics 
+                  , getopt-generics
                   , github
-                  , orgmode-parse
                   , here
-                  , text
                   , lens
+                  , orgmode-parse
+                  , text
+                  , time >= 1.4.2
                   , trifecta
-                  , unordered-containers 
+                  , unordered-containers
   Main-Is:        IssueMain.hs
   Hs-Source-Dirs: src
 
@@ -77,6 +80,7 @@ Test-Suite spec
                       , orgmode-parse
                       , template-haskell
                       , text
+                      , time >= 1.4.2
                       , unordered-containers >= 0.2.5.1
 
 Source-Repository head

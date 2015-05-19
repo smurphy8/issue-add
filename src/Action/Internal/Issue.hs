@@ -77,7 +77,38 @@ data HIssue
 
 
 
+tstIssueString :: String
+tstIssueString = [here|
+* TODO here is a comitted issue :Bug: :Regression:
+  CLOCK: CLOCK: [2015-05-16 Sat 20:55]--[2015-05-16 Sat 20:55] =>  0:00
+                                                                                                                                 |]
 
+tstString :: String
+tstString = [here|
+
+sdfjsdf
+* TODO This is the issue title :Bug:
+** ASSIGN @smurphy8
+** Events
+:PROPERTIES:
+:MileStone: 123
+:IssueNumber: 2
+:END:
+
+
+Here is the message body
+* TODO Here is another issue :HereIsAnotherLabel:
+Here is another body
+* TODO Here is another issue :Clean:
+I would like this to be a working thing
+* TODO Generate new issue :Bug:
+This is a test of issue generation
+* TODO Add org-file issue tracking :Enhancement: :User Interface:
+It would be nice if things like milestones
+would be automatically added in
+
+
+|]
 
 
 
@@ -140,18 +171,18 @@ fromNewIssue  ni = HNewIssue
 
 -- | Document Conversion
 
-fromDocument :: Document -> [HNewIssue]
-fromDocument = rights . fmap fromHeader . documentHeadings
+hNewIssuesFromDocument :: Document -> [HNewIssue]
+hNewIssuesFromDocument = rights . fmap fromHeadingToHNewIssue . documentHeadings
 
 toDocument :: [HNewIssue] -> Document
-toDocument hnis = Document "" (fmap toHeader hnis)
+toDocument hnis = Document "" (fmap hNewIssueToHeading hnis)
 
 -- | It would be nice to make an exact round trip between
 -- |headers and Issues but it can't quite work like that
 -- New Issues start with a TODO
 -- Issues starting with anything else are ignored
-fromHeader :: Heading -> Either String HNewIssue
-fromHeader hdng
+fromHeadingToHNewIssue :: Heading -> Either String HNewIssue
+fromHeadingToHNewIssue hdng
   |validNewIssueHeading hdng = Right $ HNewIssue
                                                                     hnIssueTitle
                                                                     hnIssueBody
@@ -203,30 +234,30 @@ parseUser t = either (const "") id runParser
 
 
 -- | toHeader produces a TODO task with assignment to a user and other things
-toHeader :: HNewIssue -> Heading
-toHeader hni = Heading {
-                   level = Level 1
-                 , keyword = Just . StateKeyword $ "TODO"
-                 , priority = Nothing
-                 , title = hni ^. hNewIssueTitle
-                 , stats = Nothing
-                 , tags = views hNewIssueLabels (fmap (pack.toLabelString)) hni
-                 , section = toSectionBody hni
-                 , subHeadings = toAssignmentHeading hni }
-          where
-           toAssignmentHeading :: HNewIssue -> [Heading]
-           toAssignmentHeading hni'
-              | not . T.null $ assignee = [Heading { level = Level 2
-                                                         , keyword = Just . StateKeyword $ "ASSIGN"
-                                                         , priority = Nothing
-                                                         , title = assignee
-                                                         , stats = Nothing
-                                                         , tags = []
-                                                         , section = emptySection
-                                                         , subHeadings = []  }]
-              | otherwise = []
-             where
-               assignee = hni' ^. hNewIssueAssignee
+hNewIssueToHeading :: HNewIssue -> Heading
+hNewIssueToHeading hni = Heading {
+                              level = Level 1
+                            , keyword = Just . StateKeyword $ "TODO"
+                            , priority = Nothing
+                            , title = hni ^. hNewIssueTitle
+                            , stats = Nothing
+                            , tags = views hNewIssueLabels (fmap (pack.toLabelString)) hni
+                            , section = toSectionBody hni
+                            , subHeadings = toAssignmentHeading hni }
+                     where
+                      toAssignmentHeading :: HNewIssue -> [Heading]
+                      toAssignmentHeading hni'
+                         | not . T.null $ assignee = [Heading { level = Level 2
+                                                                    , keyword = Just . StateKeyword $ "ASSIGN"
+                                                                    , priority = Nothing
+                                                                    , title = assignee
+                                                                    , stats = Nothing
+                                                                    , tags = []
+                                                                    , section = emptySection
+                                                                    , subHeadings = []  }]
+                         | otherwise = []
+                        where
+                          assignee = hni' ^. hNewIssueAssignee
 -- | default section useful for rendering
 emptySection :: Section
 emptySection = Section {
@@ -258,28 +289,6 @@ toSectionBody hni = Section {
 tst :: Text
 tst = pack tstString
 
-tstString :: String
-tstString = [here|
-
-sdfjsdf
-* TODO This is the issue title :Bug:
-** ASSIGN @smurphy8
-:PROPERTIES:
-:MileStone: 123
-:END:
-Here is the message body
-* TODO Here is another issue :HereIsAnotherLabel:
-Here is another body
-* TODO Here is another issue :Clean:
-I would like this to be a working thing
-* TODO Generate new issue :Bug:
-This is a test of issue generation
-* TODO Add org-file issue tracking :Enhancement: :User Interface:
-It would be nice if things like milestones
-would be automatically added in
-
-
-|]
 
 -- |Network
 createNewIssue
@@ -299,7 +308,7 @@ parseIssueFromDoc :: ByteString -> ByteString -> String -> String -> FilePath ->
 parseIssueFromDoc user pass owner repo fp = do
   doc <- TIO.readFile fp
   let auth = Github.GithubBasicAuth user pass
-      eitherNewIssues = fmap (fmap toNewIssue.fromDocument) . parseOrgMode $ doc
+      eitherNewIssues = fmap (fmap toNewIssue.hNewIssuesFromDocument) . parseOrgMode $ doc
 
   case eitherNewIssues of
     Left str -> fail str

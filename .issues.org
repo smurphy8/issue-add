@@ -38,6 +38,7 @@ Hidden Issues file for this repo (also serves as a test)
 
 
 * TODO Thefirst snippet issue :Bug:User Interface
+  CLOCK: [2015-05-16 Sat 20:55]--[2015-05-16 Sat 20:55] =>  0:00
   Here's a description
   
   
@@ -49,6 +50,9 @@ Hidden Issues file for this repo (also serves as a test)
 
 
 * DONE Make Done keyword ignore issue in list                   :Enhancement:
+  
+  CLOSED: [2015-05-16 Sat 20:55]
+  CLOCK: [2015-05-16 Sat 20:55]--[2015-05-16 Sat 20:55] =>  0:00
 Eventually I want more interactive work with issues
 but for now.. I just want the issues to be ignored when they are 
 marked done.  
