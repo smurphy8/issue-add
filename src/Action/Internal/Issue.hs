@@ -1,3 +1,4 @@
+{-# LANGUAGE NamedFieldPuns    #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE TemplateHaskell   #-}
@@ -74,6 +75,36 @@ data HIssue
             , _hIssueId          :: Int
             , _hIssueComments    :: Int
             , _hIssueMilestone   :: Maybe Github.Milestone}
+  deriving (Eq,Ord,Show)
+makeLenses ''HIssue
+
+
+
+
+
+hIssueToHeading issue = newHeading
+  where
+    newHeading  = (Heading { level = (Level 1)
+                           , keyword     = checkKeywordIssue issue
+                           , priority    = Nothing
+                           , title       = issue ^. hIssueTitle
+                           , stats       = Nothing
+                           , tags        = makeTags issue
+                           , section     = makeSection issue
+                           , subHeadings = makeSubHeadings issue })
+    checkKeywordIssue issue'  = undefined
+    makeTags  = views hIssueLabels (fmap (pack.toLabelString))
+    makeSection issue'       = undefined
+    makeSubHeadings issue'  =  undefined
+
+
+
+
+
+
+
+
+
 
 
 
@@ -243,21 +274,25 @@ hNewIssueToHeading hni = Heading {
                             , stats = Nothing
                             , tags = views hNewIssueLabels (fmap (pack.toLabelString)) hni
                             , section = toSectionBody hni
-                            , subHeadings = toAssignmentHeading hni }
+                            , subHeadings = toAssignmentHeading assignee }
                      where
-                      toAssignmentHeading :: HNewIssue -> [Heading]
-                      toAssignmentHeading hni'
-                         | not . T.null $ assignee = [Heading { level = Level 2
-                                                                    , keyword = Just . StateKeyword $ "ASSIGN"
-                                                                    , priority = Nothing
-                                                                    , title = assignee
-                                                                    , stats = Nothing
-                                                                    , tags = []
-                                                                    , section = emptySection
-                                                                    , subHeadings = []  }]
-                         | otherwise = []
-                        where
-                          assignee = hni' ^. hNewIssueAssignee
+                      assignee = hni ^. hNewIssueAssignee
+
+
+-- | Used for both 'hNewIssueToHeading' and 'hIssueToHeading' to create the assigned person entry in org-mode
+toAssignmentHeading :: Text -> [Heading]
+toAssignmentHeading assignee
+   | not . T.null $ assignee = [Heading { level = Level 2
+                                              , keyword = Just . StateKeyword $ "ASSIGN"
+                                              , priority = Nothing
+                                              , title = assignee
+                                              , stats = Nothing
+                                              , tags = []
+                                              , section = emptySection
+                                              , subHeadings = []  }]
+   | otherwise = []
+
+
 -- | default section useful for rendering
 emptySection :: Section
 emptySection = Section {
