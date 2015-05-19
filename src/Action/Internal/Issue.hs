@@ -50,7 +50,8 @@ hIssueToHeading issue = newHeading
     checkKeywordIssue issue'  = undefined
     makeTags  = views hIssueLabels (fmap (pack.toLabelString))
     makeSection issue'       = undefined
-    makeSubHeadings issue'  =  undefined
+    assignee = issue ^. hIssueAssignee
+    makeSubHeadings issue'  = toAssignmentHeading assignee
 
 
 
@@ -95,21 +96,6 @@ would be automatically added in
 
 
 |]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -210,7 +196,9 @@ parseUser t = either (const "") id runParser
 
 
 
--- | toHeader produces a TODO task with assignment to a user and other things
+-- | hNewIssueToHeading produces a TODO task with assignment to a user and other things
+-- | names in sections are present to make it easier to read
+-- | the milestones enter the Section as Map "MileStone" Int
 hNewIssueToHeading :: HNewIssue -> Heading
 hNewIssueToHeading hni = Heading {
                               level = Level 1
@@ -223,6 +211,17 @@ hNewIssueToHeading hni = Heading {
                             , subHeadings = toAssignmentHeading assignee }
                      where
                       assignee = hni ^. hNewIssueAssignee
+
+                      toSectionBody :: HNewIssue -> Section
+                      toSectionBody hni' = Section {
+                                             sectionPlannings = Plns HM.empty
+                                             , sectionClocks = []
+                                             , sectionProperties = issueProps
+                                             , sectionParagraph = paragraph }
+                          where
+                           issueProps  = views hNewIssueMilestone addToMap hni'
+                           addToMap = maybe HM.empty (\i -> HM.insert "MileStone" (pack.show $ i) HM.empty)
+                           paragraph = hni' ^. hNewIssueBody
 
 
 -- | Used for both 'hNewIssueToHeading' and 'hIssueToHeading' to create the assigned person entry in org-mode
@@ -247,19 +246,6 @@ emptySection = Section {
                      , sectionProperties = HM.empty
                     , sectionParagraph = "" }
 
-
--- | names in sections are present to make it easier to read
--- | the milestones enter the Section as Map "MileStone" Int
-toSectionBody :: HNewIssue -> Section
-toSectionBody hni = Section {
-                       sectionPlannings = Plns HM.empty
-                       , sectionClocks = []
-                       , sectionProperties = issueProps
-                       , sectionParagraph = paragraph }
-  where
-     issueProps  = views hNewIssueMilestone addToMap hni
-     addToMap = maybe HM.empty (\i -> HM.insert "MileStone" (pack.show $ i) HM.empty)
-     paragraph = hni ^. hNewIssueBody
 
 
 

@@ -54,7 +54,7 @@ data HIssue
             , _hIssueClosedBy    :: Maybe Text
             , _hIssueLabels      :: [RepoLabel]
             , _hIssueNumber      :: Int
-            , _hIssueAssignee    :: Maybe Text
+            , _hIssueAssignee    :: Text
             , _hIssueUser        :: Text
             , _hIssueTitle       :: Text
             , _hIssuePullRequest :: Maybe Github.PullRequestReference
