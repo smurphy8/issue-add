@@ -4,41 +4,17 @@ module Action.Internal.Label (RepoLabel (..), addLabelsToRepo,
                               toLabelColorString,labelStringPairList,
                               toLabelString,labelList,toLabelStringPair) where
 import           Control.Applicative
-import           Control.Arrow        ((***))
-import           Data.ByteString      (ByteString)
-import           Data.Monoid          ((<>))
+import           Control.Arrow               ((***))
+import           Data.ByteString             (ByteString)
+import           Data.Monoid                 ((<>))
 import           Data.Traversable
 import           Github.Auth
-import qualified Github.Issues.Labels as Github
--- | Won't work till my repo is merged
+import qualified Github.Issues.Labels        as Github
 
 
+-- Local
+import           Action.Internal.Label.Types (RepoLabel (..))
 
--- | All the agreed apon labels for a github repo
-
-data RepoLabel = Bug
-                 |Test
-                 |Enhancement
-                 |Documentation
-                 |Question
-                 |UserInterface
-                 |Performance
-                 |MonitoringLogging
-                 |NetworkIssue
-                 |Deployment
-                 |Regression
-                 |DependencyManagement
-                 |CustomerRequest
-                 |FieldServiceRequest
-                 |NeedDiscussion
-                 |NeedTestCase
-                 |NeedInfo
-                 |Duplicate
-                 |Wontfix
-                 |Ready
-                 |InProgress
-                 |Clean
- deriving (Show,Eq,Ord,Enum)
 
 -- | Call to the network to add all Labels
 

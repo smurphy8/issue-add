@@ -16,7 +16,9 @@ Library
   GHC-Options:          -Wall
   Exposed-Modules:      Action.Label
                         Action.Internal.Issue
-                        Action.Internal.Label                        
+                        Action.Internal.Issue.Types                        
+                        Action.Internal.Label
+                        Action.Internal.Label.Types                        
   Build-Depends:        attoparsec
                       , base >= 4 && < 5
                       , bytestring
