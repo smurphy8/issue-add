@@ -41,7 +41,8 @@ spec :: Spec
 spec = do
    describeTH ['renderHeading] $ do
      it "should parse a golden test and render it back consistently" $ do
-        let (Right exDoc ) = eitherExample
-
+        let (Right h' ) = fmap (head.documentHeadings) .
+                               parseOrgMode . renderHeading $ h
         headingExample `shouldBe` renderHeading h
+        h' `shouldBe` h
 
