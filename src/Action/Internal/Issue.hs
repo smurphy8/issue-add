@@ -71,33 +71,6 @@ tstIssueString = [here|
   CLOCK: CLOCK: [2015-05-16 Sat 20:55]--[2015-05-16 Sat 20:55] =>  0:00
                                                                                                                                  |]
 
-tstString :: String
-tstString = [here|
-
-sdfjsdf
-* TODO This is the issue title :Bug:
-** ASSIGN @smurphy8
-** Events
-:PROPERTIES:
-:MileStone: 123
-:IssueNumber: 2
-:END:
-
-
-Here is the message body
-* TODO Here is another issue :HereIsAnotherLabel:
-Here is another body
-* TODO Here is another issue :Clean:
-I would like this to be a working thing
-* TODO Generate new issue :Bug:
-This is a test of issue generation
-* TODO Add org-file issue tracking :Enhancement: :User Interface:
-It would be nice if things like milestones
-would be automatically added in
-
-
-|]
-
 
 
 
@@ -152,7 +125,7 @@ fromHeadingToHNewIssue hdng
                                                                     (headingToIssueAssignee hdng)
                                                                     mileStones
                                                                     repoLabels
-  | otherwise = Left $ "format Like: " ++ tstString
+  | otherwise = Left $ "format Like: " ++ exampleString
   where
     hnIssueTitle = title hdng
     hnIssueBody = sectionParagraph.section $ hdng
@@ -167,7 +140,32 @@ fromHeadingToHNewIssue hdng
                                  maybe False (\kw -> StateKeyword "TODO" == kw)
                                  (keyword hdng')
 
+exampleString :: String
+exampleString = [here|
 
+sdfjsdf
+* TODO This is the issue title :Bug:
+** ASSIGN @smurphy8
+** Events
+:PROPERTIES:
+:MileStone: 123
+:IssueNumber: 2
+:END:
+
+
+Here is the message body
+* TODO Here is another issue :HereIsAnotherLabel:
+Here is another body
+* TODO Here is another issue :Clean:
+I would like this to be a working thing
+* TODO Generate new issue :Bug:
+This is a test of issue generation
+* TODO Add org-file issue tracking :Enhancement: :User Interface:
+It would be nice if things like milestones
+would be automatically added in
+
+
+|]
 
 
 -- |Issue Assignees must be added at the second level heading

@@ -36,10 +36,10 @@ renderHeading heading = outline
    where
      renderLevel = T.replicate starCount "*"
      renderedKeyword = views _Just unStateKeyword maybeKeyword
-     renderedPriority = views _Just show maybePriority
+     renderedPriority = renderPriority maybePriority
      renderedTitle = title
      renderedStats = views _Just renderStats maybeStats
-     renderedTags = ":" <> T.intercalate "::" tags <> ":"
+     renderedTags = renderTags tags
      renderedSubHeadings = views folded renderHeading subHeadings
      (Heading{level  = (Level starCount)
              ,keyword = maybeKeyword
@@ -49,13 +49,20 @@ renderHeading heading = outline
              ,tags
              ,section
              ,subHeadings}) = heading
-     outline = [i|
-${renderLevel} ${renderedKeyword} [${renderedPriority}] ${renderedTitle} [${renderedStats}] ${renderedTags}
-
+     outline = [i|${renderLevel} ${renderedKeyword} [${renderedPriority}] ${renderedTitle} ${renderedStats} ${renderedTags}
 ${renderedSubHeadings}
 |]
+
+
+renderTags tags
+ |null tags = ""
+ |otherwise = ":" <> T.intercalate "::" tags <> ":"
 
 -- | Only renders the inner part of the statistic for now
 renderStats (StatsPct i) = (pack.show $ i) <> "%"
 renderStats (StatsOf x y) = (pack.show $ x) <> "/" <>
                             (pack.show $ y)
+
+
+renderPriority (Just p) = "["<> (pack.show $ p) <> "]"
+renderPriority Nothing = ""
