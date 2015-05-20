@@ -1,5 +1,6 @@
-{-# LANGUAGE QuasiQuotes     #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes       #-}
+{-# LANGUAGE TemplateHaskell   #-}
 module Action.Internal.RenderSpec (main, spec) where
 
 
@@ -20,8 +21,16 @@ import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 
 
+-- | Heading Golden Test Code
 
-eitherExample = parseOrgMode . pack $ exampleString
+headingExample = "* TODO [#A] This is the issue title [0%] :Bug:\n** ASSIGN  @smurphy8  \n\n**   Events  \n\n\n"
+
+eitherExample = parseOrgMode headingExample
+(h:headings) = documentHeadings doc
+  where
+   (Right doc)= eitherExample
+
+
 
 
 describeTH names = describe (unwords $ nameBase <$> names)
@@ -30,9 +39,9 @@ main = hspec spec
 
 spec :: Spec
 spec = do
-   describeTH ['parseOrgMode,'renderHeading] $ do
+   describeTH ['renderHeading] $ do
      it "should parse a golden test and render it back consistently" $ do
         let (Right exDoc ) = eitherExample
 
-        exDoc `shouldBe` exDoc
+        headingExample `shouldBe` renderHeading h
 
