@@ -75,4 +75,4 @@ spec = do
 -- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
 -- first version won't implement the issue number stuff
 tst :: Text
-tst = pack tstString
+tst = pack exampleString
