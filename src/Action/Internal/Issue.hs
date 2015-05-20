@@ -39,31 +39,32 @@ makeLenses ''HNewIssue
 
 hIssueToHeading issue = newHeading
   where
-    newHeading  = (Heading { level = (Level 1)
-                           , keyword     = checkKeywordIssue issue
+    newHeading  = (Heading { level = Level 1
+                           , keyword     = Just . checkKeywordIssue $ issue
                            , priority    = Nothing
                            , title       = issue ^. hIssueTitle
                            , stats       = Nothing
                            , tags        = makeTags issue
-                           , section     = makeSection issue
+                           , section     = toSectionBody issue
                            , subHeadings = makeSubHeadings issue })
-    checkKeywordIssue issue'  = undefined
+    checkKeywordIssue issue'  = maybe todo (const done) $ issue' ^. hIssueClosedAt  -- check if TODO or DONE SHOULD BE HERE
     makeTags  = views hIssueLabels (fmap (pack.toLabelString))
-    makeSection issue'       = undefined
     assignee = issue ^. hIssueAssignee
     makeSubHeadings issue'  = toAssignmentHeading assignee
-
-
-
-
-
-
-
-
-
-
-
-
+    toSectionBody :: HIssue -> Section
+    toSectionBody issue' = Section {
+                                sectionPlannings = Plns HM.empty
+                                , sectionClocks = []
+                                , sectionProperties = issueProps
+                                , sectionParagraph = paragraph }
+        where
+         issueProps  = HM.insert "IssueNumber" (pack.show._hIssueNumber $ issue') milestoneProps
+         milestoneProps  = views hIssueMilestone addToMap issue'
+         addToMap :: Maybe Int -> HM.HashMap Text Text
+         addToMap = maybe HM.empty (\i -> HM.insert "MileStone" (pack.show $ i) HM.empty)
+         paragraph = issue' ^. hIssueBody
+todo = StateKeyword "TODO"
+done = StateKeyword "Done"
 tstIssueString :: String
 tstIssueString = [here|
 * TODO here is a comitted issue :Bug: :Regression:
@@ -137,9 +138,8 @@ fromNewIssue  ni = HNewIssue
 hNewIssuesFromDocument :: Document -> [HNewIssue]
 hNewIssuesFromDocument = rights . fmap fromHeadingToHNewIssue . documentHeadings
 
-toDocument :: [HNewIssue] -> Document
-toDocument hnis = Document "" (fmap hNewIssueToHeading hnis)
-
+hNewIssuesToDocument :: [HNewIssue] -> Document
+hNewIssuesToDocument hnis = Document "" (fmap hNewIssueToHeading hnis)
 -- | It would be nice to make an exact round trip between
 -- |headers and Issues but it can't quite work like that
 -- New Issues start with a TODO
@@ -248,13 +248,6 @@ emptySection = Section {
 
 
 
-
-
--- | Example
--- | (Right rslt) = parseOnly (parseDocument ["TODO"]) tst
--- first version won't implement the issue number stuff
-tst :: Text
-tst = pack tstString
 
 
 -- |Network

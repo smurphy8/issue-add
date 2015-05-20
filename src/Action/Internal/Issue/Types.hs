@@ -32,39 +32,27 @@ import           Action.Internal.Label.Types (RepoLabel (..))
 -- the 'H' is for 'Heading'
 -- the 'OrgIssue' is for orgmode there are close ties to the data types used in 'Github'
 
-data OrgIssueOwnerType = GithubUser | GithubOrganization
-  deriving (Eq, Ord, Show)
-
-data OrgIssueOwner = OrgIssueOwner {
-                          _ownerType       :: OrgIssueOwnerType
-                        , _avatarUrl       :: Text
-                        , _ownerLogin      :: Text
-                        , _ownerUrl        :: Text
-                        , _ownerId         :: Int
-                        , _ownerGravatarId :: Maybe Text }
-  deriving (Eq, Ord, Show)
-
 
 -- | 'HIssue'
 data HIssue
-  = HIssue {  _hIssueClosedAt    :: Maybe UTCTime
-            , _hIssueUpdatedAt   :: Maybe UTCTime
-            , _hIssueEventsUrl   :: Text
-            , _hIssueHtmlUrl     :: Maybe Text
-            , _hIssueClosedBy    :: Maybe Text
-            , _hIssueLabels      :: [RepoLabel]
-            , _hIssueNumber      :: Int
-            , _hIssueAssignee    :: Text
-            , _hIssueUser        :: Text
-            , _hIssueTitle       :: Text
-            , _hIssuePullRequest :: Maybe Github.PullRequestReference
-            , _hIssueUrl         :: String
-            , _hIssueCreatedAt   :: Github.GithubDate
-            , _hIssueBody        :: Maybe String
-            , _hIssueState       :: String
-            , _hIssueId          :: Int
-            , _hIssueComments    :: Int
-            , _hIssueMilestone   :: Maybe Github.Milestone}
+  = HIssue {  _hIssueClosedAt       :: Maybe UTCTime
+            , _hIssueUpdatedAt      :: Maybe UTCTime
+            , _hIssueEventsUrl      :: Text
+            , _hIssueHtmlUrl        :: Maybe Text
+            , _hIssueClosedBy       :: Maybe Text
+            , _hIssueLabels         :: [RepoLabel]
+            , _hIssueNumber         :: Int
+            , _hIssueAssignee       :: Text
+            , _hIssueUser           :: Text
+            , _hIssueTitle          :: Text
+            , _hIssuePullRequestUrl :: Text
+            , _hIssueUrl            :: String
+            , _hIssueCreatedAt      :: UTCTime
+            , _hIssueBody           :: Text
+            , _hIssueState          :: String
+            , _hIssueId             :: Int
+            , _hIssueComments       :: Int
+            , _hIssueMilestone      :: Maybe Int}
   deriving (Eq,Ord,Show)
 
 

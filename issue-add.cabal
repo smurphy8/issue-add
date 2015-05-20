@@ -15,6 +15,8 @@ Library
   HS-Source-Dirs:       src
   GHC-Options:          -Wall
   Exposed-Modules:      Action.Label
+                        Action.Issue
+                        Action.Internal.Render               
                         Action.Internal.Issue
                         Action.Internal.Issue.Types                        
                         Action.Internal.Label
@@ -29,6 +31,7 @@ Library
                       , orgmode-parse
                       , shakespeare
                       , shakespeare-templates
+                      , template-haskell
                       , text
                       , time >= 1.4.2
                       , trifecta
@@ -41,6 +44,7 @@ Executable add-labels-with-auth
                   , lens
                   , shakespeare
                   , shakespeare-templates
+                  , template-haskell
                   , time >= 1.4.2
                   , trifecta
                   , unordered-containers
@@ -56,6 +60,7 @@ Executable add-issues-with-auth
                   , here
                   , lens
                   , orgmode-parse
+                  , template-haskell
                   , text
                   , time >= 1.4.2
                   , trifecta
@@ -80,6 +85,7 @@ Test-Suite spec
                       , hspec
                       , lens >= 4.9.1
                       , orgmode-parse
+                      , template-haskell
                       , template-haskell
                       , text
                       , time >= 1.4.2
