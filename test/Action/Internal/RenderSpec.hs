@@ -47,7 +47,6 @@ fixRenderFunction  = fmap (renderHeading.head.documentHeadings) .
 fixHeadingFunction = fmap (head.documentHeadings) . parseOrgMode .
                      renderHeading
 
-
 runFixN f n' i' = either (const False) (const True) $ loop n' i'
    where
     loop n i = do
@@ -67,5 +66,5 @@ spec :: Spec
 spec = do
    describeTH ['renderHeading] $ do
      it "checks a simple example for a fixed point on parsing and rendering" $ do
-        True `shouldBe` (runFixN fixRenderFunction 5 headingExample)
-        True `shouldBe` runFixN fixHeadingFunction 5 h
+        True `shouldBe` runFixN fixRenderFunction 5 headingExample
+        True `shouldBe`  runFixN fixHeadingFunction 5 h
